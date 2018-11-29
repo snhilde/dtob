@@ -5,7 +5,9 @@
 #include <unistd.h>
 #include <ctype.h>
 
-bool byte_break = false, nibble_break = false;
+bool alpha_flag = false,
+	 byte_flag = false,
+	 nibble_flag = false;
 	
 void
 usage(void)
@@ -33,23 +35,92 @@ dtob(char *num, size_t size)
 			binary = *num & (1 << i);
 			printf("%d", binary);
 			
-			if (i == 4 && nibble_break)
+			if (i == 4 && nibble_flag)
 				printf(" ");
 		}
 		
-		if (byte_break)
+		if (byte_flag)
 			printf(" ");
 	}
 	
 	return 0;
 }
 
+static int
+print_alpha(char *value)
+{
+	void *ptr;
+	
+	ptr = value;
+	printf("Binary represntation of string \"%s\":\n", value);
+	dtob(ptr, strlen(value));
+	
+	return 0;
+}
+
+/*
+#define PRINT_NUM(type, var) \
+	type var; \
+	void *ptr; \
+	\
+	var = ato ## var(value); \
+	ptr = &var; \
+	printf("Binary represntation of " type " \"%f\":\n", var); \
+	dtob(ptr, sizeof(var)); \
+	\
+	return 0;
+*/
+
+static int
+print_float(char *value)
+{
+	// PRINT_NUM(float, f);
+	float f;
+	void *ptr;
+	
+	f = atof(value);
+	ptr = &f;
+	printf("Binary represntation of float \"%f\":\n", f);
+	dtob(ptr, sizeof(f));
+	
+	return 0;
+}
+
+static int
+print_int(char *value)
+{
+	int i;
+	void *ptr;
+	
+	i = atoi(value);
+	ptr = &i;
+	printf("Binary represntation of integer \"%d\":\n", i);
+	dtob(ptr, sizeof(i));
+	
+	return 0;
+}
+
+static int
+determine_type(char *value)
+{
+	char *char_ptr;
+	
+	for (char_ptr = value; *char_ptr; char_ptr++) {
+		if (isalpha(*char_ptr) || alpha_flag) {
+			return print_alpha(value);
+		} else if (*char_ptr == '.') {
+			return print_float(value);
+		} else if (!*(char_ptr + 1))
+			return print_int(value);
+	}
+	
+	return -1;
+}
+
 int
 main(int argc, char *argv[])
 {
-	char opt, *value, *is_ptr;
-	void *num_ptr;
-	bool alpha_flag = false, float_flag = false;
+	char opt;
 	
 	while ((opt = getopt(argc, argv, "bns")) != -1) {
 		switch (opt) {
@@ -57,9 +128,9 @@ main(int argc, char *argv[])
 				alpha_flag = true;
 				break;
 			case 'n':
-				nibble_break = true;	/* not a bug */
+				nibble_flag = true;	/* not a bug */
 			case 'b':
-				byte_break = true;
+				byte_flag = true;
 				break;
 			default:
 				usage();
@@ -67,29 +138,8 @@ main(int argc, char *argv[])
 		}
 	}
 	
-	value = argv[argc - 1];
-	for (is_ptr = value; *is_ptr; is_ptr++) {
-		if (isalpha(*is_ptr) || alpha_flag) {
-			printf("Binary represntation of string \"%s\":\n", value);
-			dtob(value, strlen(value));
-			alpha_flag = true;
-			break;
-		} else if (*is_ptr == '.')
-			float_flag = true;
-	}
-	
-	if (float_flag) {
-		float num = atof(value);
-		num_ptr = &num;
-		printf("Binary represntation of float \"%f\":\n", num);
-		dtob(num_ptr, sizeof(num));
-	} else if (!alpha_flag) {
-		int num = atoi(value);
-		num_ptr = &num;
-		printf("Binary represntation of integer \"%d\":\n", num);
-		dtob(num_ptr, sizeof(num));
-	}
-	
+	if (determine_type(argv[argc - 1]))
+		printf("Could not determine input type.");
 	printf("\n");
 	
 	return 0;
