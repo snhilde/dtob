@@ -57,7 +57,7 @@ main(int argc, char *argv[])
 				alpha_flag = true;
 				break;
 			case 'n':
-				nibble_break = true;	/* intentional */
+				nibble_break = true;	/* not a bug */
 			case 'b':
 				byte_break = true;
 				break;
