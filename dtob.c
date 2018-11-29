@@ -5,6 +5,17 @@
 #include <unistd.h>
 #include <ctype.h>
 
+#define PRINT_NUM(type, var) {\
+	type var; \
+	void *ptr; \
+	\
+	var = ato ## var(value); \
+	ptr = &var; \
+	printf("Binary represntation of " #type " %s:\n", value); \
+	dtob(ptr, sizeof(var)); \
+	\
+	return 0; }
+
 bool alpha_flag = false,
 	 byte_flag = false,
 	 nibble_flag = false;
@@ -58,60 +69,18 @@ print_alpha(char *value)
 	return 0;
 }
 
-/*
-#define PRINT_NUM(type, var) \
-	type var; \
-	void *ptr; \
-	\
-	var = ato ## var(value); \
-	ptr = &var; \
-	printf("Binary represntation of " type " \"%f\":\n", var); \
-	dtob(ptr, sizeof(var)); \
-	\
-	return 0;
-*/
-
-static int
-print_float(char *value)
-{
-	// PRINT_NUM(float, f);
-	float f;
-	void *ptr;
-	
-	f = atof(value);
-	ptr = &f;
-	printf("Binary represntation of float \"%f\":\n", f);
-	dtob(ptr, sizeof(f));
-	
-	return 0;
-}
-
-static int
-print_int(char *value)
-{
-	int i;
-	void *ptr;
-	
-	i = atoi(value);
-	ptr = &i;
-	printf("Binary represntation of integer \"%d\":\n", i);
-	dtob(ptr, sizeof(i));
-	
-	return 0;
-}
-
 static int
 determine_type(char *value)
 {
 	char *char_ptr;
 	
 	for (char_ptr = value; *char_ptr; char_ptr++) {
-		if (isalpha(*char_ptr) || alpha_flag) {
+		if (isalpha(*char_ptr) || alpha_flag)
 			return print_alpha(value);
-		} else if (*char_ptr == '.') {
-			return print_float(value);
-		} else if (!*(char_ptr + 1))
-			return print_int(value);
+		else if (*char_ptr == '.')
+			PRINT_NUM(float, f)
+		else if (!*(char_ptr + 1))
+			PRINT_NUM(int, i)
 	}
 	
 	return -1;
