@@ -91,6 +91,11 @@ main(int argc, char *argv[])
 {
 	char opt;
 	
+	if (argc == 1) {
+		usage();
+		exit(1);
+	}
+	
 	while ((opt = getopt(argc, argv, "bns")) != -1) {
 		switch (opt) {
 			case 's':
