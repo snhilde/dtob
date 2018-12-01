@@ -53,6 +53,7 @@ dtob(char *num, size_t size)
 		if (byte_flag)
 			printf(" ");
 	}
+	printf("\n");
 	
 	return 0;
 }
@@ -114,7 +115,6 @@ main(int argc, char *argv[])
 	
 	if (determine_type(argv[argc - 1]))
 		printf("Could not determine input type.");
-	printf("\n");
 	
 	return 0;
 }
