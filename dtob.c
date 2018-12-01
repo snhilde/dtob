@@ -35,7 +35,7 @@ usage(void)
 	printf("-s: force dtob to interpret input as string\n");
 }
 
-static int
+void
 dtob(char *num, size_t size)
 {
 	int i;
@@ -54,8 +54,6 @@ dtob(char *num, size_t size)
 			printf(" ");
 	}
 	printf("\n");
-	
-	return 0;
 }
 
 static int
